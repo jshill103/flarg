@@ -7,3 +7,14 @@ c:\users\test\documents\visual studio 2015\Projects\test\test\obj\Debug\test.Pro
 c:\users\test\documents\visual studio 2015\Projects\test\test\obj\Debug\test.csproj.GenerateResource.Cache
 c:\users\test\documents\visual studio 2015\Projects\test\test\obj\Debug\test.exe
 c:\users\test\documents\visual studio 2015\Projects\test\test\obj\Debug\test.pdb
+E:\troveBot\flarg\test\bin\Debug\test.exe.config
+E:\troveBot\flarg\test\bin\Debug\test.exe
+E:\troveBot\flarg\test\bin\Debug\test.pdb
+E:\troveBot\flarg\test\bin\Debug\WindowsInput.dll
+E:\troveBot\flarg\test\bin\Debug\WindowsInput.xml
+E:\troveBot\flarg\test\obj\Debug\test.Form1.resources
+E:\troveBot\flarg\test\obj\Debug\test.Properties.Resources.resources
+E:\troveBot\flarg\test\obj\Debug\test.csproj.GenerateResource.Cache
+E:\troveBot\flarg\test\obj\Debug\test.exe
+E:\troveBot\flarg\test\obj\Debug\test.pdb
+E:\troveBot\flarg\test\obj\Debug\test.csprojResolveAssemblyReference.cache

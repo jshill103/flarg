@@ -4,7 +4,9 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using RSG;
 
 
 namespace test
@@ -37,11 +39,10 @@ namespace test
             int cbSize);
 
         IntPtr windowHandle = FindWindow(null, "Trove");
-        IntPtr launcher = FindWindow(null, "Glyph");
-        bool isActive;
+        bool isActive, isEmptyThere;
         int seconds;
-        Bitmap market, sellTab, bagButton, claim, confirmSale, empty, itemTab, item, pricePerUnit, createListing, okButton;
-        Point? isMarketVisible, claims, isEmpty, isBagVisible, items, marketPos, pricePos, createPos, confirmPos, okPos = null;
+        Bitmap marketX, market, sellTab, bagButton, claim, confirmSale, empty, itemTab, item, pricePerUnit, createListing, okButton;
+        Point? isMarketVisible, sellTabCoords, claims, isEmpty, isBagVisible, items, pricePos, createPos, confirmPos, okPos = null;
 
 
         public Form1()
@@ -65,9 +66,8 @@ namespace test
             confirmSale = new Bitmap(Properties.Resources.confirmSale);
             okButton = new Bitmap(Properties.Resources.okButton);
 
-
             isActive = false;
-            seconds = 0;
+            seconds = 55;
             MoveWindow(windowHandle, 0, 0, 1200, 700, true);
             
         }
@@ -93,54 +93,118 @@ namespace test
             if (isActive)
             {
                 seconds++;
-                if(seconds >= 5)
+                if(seconds >= 30)
                 {
                     runBot();
                     seconds = 0;
-                    isActive = false;
+                    
                 }
             }
         }
 
-
-        private void runBot()
+        private async void runBot()
         {
+            await openMarket();
+            await claimSales();
+            isEmptyThere = await checkForEmpty();
+            if (isEmptyThere == true)
+            {
+                await checkBag();
+                await listItem();
+            }
+            await closeMarketAndBag();
+        }
 
+        //Process
+        //1. open market check for claim, click on claim
+        //2. check for empty if emtpy list and item
+        //3. close all windows
+        //4. rinse repeat
+
+        private async Task openMarket()
+        {
             isMarketVisible = checkScreen(market);
             if (isMarketVisible == null)
             {
                 sendKeyInput(ScanCodeShort.KEY_U);
-                System.Threading.Thread.Sleep(1000);
-                var sellTabCoords = checkScreen(sellTab);
+                sendKeyInputUp(ScanCodeShort.KEY_U);
+                await Task.Delay(500);
+                sellTabCoords = checkScreen(sellTab);
                 LeftClick(sellTabCoords.Value);
             }
 
+        }
+
+        private async Task<bool> checkForEmpty()
+        {
+            await Task.Delay(1000);
+            isEmpty = checkScreen(empty);
+            if (isEmpty != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+            }
+
+        private async Task claimSales()
+        {
+            await Task.Delay(1000);
             claims = checkScreen(claim);
             if (claims != null)
             {
                 LeftClick(claims.Value);
             }
+            
+        }
 
-            isEmpty = checkScreen(empty);
-            if(isEmpty != null)
+        private async Task closeMarketAndBag()
+        {
+            await Task.Delay(2000);
+            isMarketVisible = checkScreen(market);
+            if (isMarketVisible != null)
             {
-                isBagVisible = checkScreen(itemTab);
-                if (isBagVisible == null)
-                {
-                    sendKeyInput(ScanCodeShort.KEY_B);
-                    sendKeyInputUp(ScanCodeShort.KEY_B);
-                }
-                System.Threading.Thread.Sleep(2000);
+                sendKeyInput(ScanCodeShort.KEY_U);
+                sendKeyInputUp(ScanCodeShort.KEY_U);
+            }
+            await Task.Delay(1000);
+            isBagVisible = checkScreen(item);
+            if (isBagVisible != null)
+            {
+                sendKeyInput(ScanCodeShort.KEY_B);
+                sendKeyInputUp(ScanCodeShort.KEY_B);
+            }
+
+        }
+
+        private async Task checkBag()
+        {
+            await Task.Delay(1000);
+            isBagVisible = checkScreen(itemTab);
+            if (isBagVisible == null)
+            {
+                sendKeyInput(ScanCodeShort.KEY_B);
+                sendKeyInputUp(ScanCodeShort.KEY_B);
+                //navigate to item tab
+                await Task.Delay(500);
                 isBagVisible = checkScreen(itemTab);
                 LeftClick(isBagVisible.Value, 10, 10);
-                System.Threading.Thread.Sleep(500);
+            }
+
+        }
+
+        private async Task listItem()
+        {
+
+                await Task.Delay(500);
                 items = checkScreen(item);
-                marketPos = checkScreen(market);
-                clickAndDrag(items.Value);
+                await clickAndDrag(items.Value);
 
                 //Enter Stack size
                 List<ScanCodeShort> codesToSend = findScanCodes(textBox2.Text);
-                sendScanCodes(codesToSend);
+                await sendScanCodes(codesToSend);
                 okPos = checkScreen(okButton);
                 LeftClick(okPos.Value);
 
@@ -148,23 +212,19 @@ namespace test
                 pricePos = checkScreen(pricePerUnit);
                 LeftClick(pricePos.Value, 15, 20);
                 List<ScanCodeShort> pricesToSend = findScanCodes(textBox1.Text);
-                sendScanCodes(pricesToSend);
+                await sendScanCodes(pricesToSend);
                 sendKeyInputUp(pricesToSend.Last());
-                System.Threading.Thread.Sleep(1000);
+                await Task.Delay(500);
                 createPos = checkScreen(createListing);
                 LeftClick(createPos.Value);
-                System.Threading.Thread.Sleep(1000);
+                await Task.Delay(500);
                 confirmPos = checkScreen(confirmSale);
                 LeftClick(confirmPos.Value);
-                LeftClick(new Point(100,100));
-
-            }
-            isActive = true;
+            
         }
 
 
-
-
+        //END OF FORMATTING
 
 
         public static Bitmap PrintWindow(IntPtr hwnd)
@@ -184,13 +244,12 @@ namespace test
             return bmp;
         }
 
-        private void sendScanCodes(List<ScanCodeShort> list)
+        private async Task sendScanCodes(List<ScanCodeShort> list)
         {
             foreach (var listItem in list)
             {
-                System.Threading.Thread.Sleep(500);
+                await Task.Delay(500);
                 sendKeyInput(listItem);
-                System.Threading.Thread.Sleep(500);
             }
         }
 
@@ -278,23 +337,23 @@ namespace test
             return Find(currScreen, image);
         }
 
-        public void clickAndDrag(Point pointA, Point pointB)
+        public async Task clickAndDrag(Point pointA, Point pointB)
         {
             Point tmp = Cursor.Position;
 
             mouse_event((int)(MouseEventFlags.LEFTUP), 0, 0, 0, 0);
             Cursor.Position = ConvertToScreenPixel(pointA);
-            System.Threading.Thread.Sleep(1000);
+            await Task.Delay(500);
             mouse_event((int)(MouseEventFlags.LEFTDOWN), 0, 0, 0, 0);
             Cursor.Position = ConvertToScreenPixel(pointB);
-            System.Threading.Thread.Sleep(1000);
+            await Task.Delay(500);
             mouse_event((int)(MouseEventFlags.LEFTUP), 0, 0, 0, 0);
 
 
             Cursor.Position = tmp;
         }
 
-        public void clickAndDrag(Point pointA)
+        public async Task clickAndDrag(Point pointA)
         {
             Point tmp = Cursor.Position;
             pointA.X = pointA.X + 20;
@@ -302,14 +361,14 @@ namespace test
 
             mouse_event((int)(MouseEventFlags.LEFTUP), 0, 0, 0, 0);
             Cursor.Position = ConvertToScreenPixel(pointA);
-            System.Threading.Thread.Sleep(500);
+            await Task.Delay(500);
             mouse_event((int)(MouseEventFlags.LEFTDOWN), 0, 0, 0, 0);
 
             for (var i = 0; i < 10; i++)
             {
                 pointA.X = pointA.X - 10;
                 Cursor.Position = ConvertToScreenPixel(pointA);
-                System.Threading.Thread.Sleep(100);
+                await Task.Delay(100);
                 mouse_event((int)(MouseEventFlags.MOVE), 0, 0, 0, 0);
             }
             

@@ -83,6 +83,16 @@ namespace test.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap claimSlot1 {
+            get {
+                object obj = ResourceManager.GetObject("claimSlot1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap confirmSale {
             get {
                 object obj = ResourceManager.GetObject("confirmSale", resourceCulture);

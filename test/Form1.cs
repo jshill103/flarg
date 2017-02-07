@@ -41,8 +41,8 @@ namespace test
         IntPtr windowHandle = FindWindow(null, "Trove");
         bool isActive, isEmptyThere;
         int seconds;
-        Bitmap marketX, market, sellTab, bagButton, claim, confirmSale, empty, itemTab, item, pricePerUnit, createListing, okButton;
-        Point? isMarketVisible, sellTabCoords, claims, isEmpty, isBagVisible, items, pricePos, createPos, confirmPos, okPos = null;
+        Bitmap claimSlotOne, market, sellTab, bagButton, claim, confirmSale, empty, itemTab, item, pricePerUnit, createListing, okButton;
+        Point? claimOne, isMarketVisible, sellTabCoords, claims, isEmpty, isBagVisible, items, pricePos, createPos, confirmPos, okPos = null;
 
 
         public Form1()
@@ -65,6 +65,7 @@ namespace test
             createListing = new Bitmap(Properties.Resources.createListing);
             confirmSale = new Bitmap(Properties.Resources.confirmSale);
             okButton = new Bitmap(Properties.Resources.okButton);
+            claimSlotOne = new Bitmap(Properties.Resources.claimSlot1);
 
             isActive = false;
             seconds = 55;
@@ -157,7 +158,11 @@ namespace test
             {
                 LeftClick(claims.Value);
             }
-            
+            claimOne = checkScreen(claimSlotOne);
+            if (claimOne != null)
+            {
+                LeftClick(claimOne.Value, 10, 0);
+            }
         }
 
         private async Task closeMarketAndBag()
